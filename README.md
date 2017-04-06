@@ -20,4 +20,4 @@ Feedback is welcome and appreciated!
 Screenshots:
 ![Alt text](http://i.imgur.com/BosOSkB.png "A file ready to be synchronised")
 ![Alt text](http://i.imgur.com/ttSpFRF.png "Using the built-in editor")
-![Alt text](http://i.imgur.com/82pKj6w.png "SubsNj performing repairs on a file with formatting errors")
+![Alt text](http://i.imgur.com/82pKj6w.png "SubsNj performing repairs on a file with formatting errors") 
