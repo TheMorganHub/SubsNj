@@ -11,8 +11,12 @@ Potential upcoming features if I've got time:
 
 Feedback is welcome and appreciated!
 
--Made with lots of warm Java by Morgan <3
+-Made with lots of warm Java by Morgan < 3
 
 *(If you're only looking for the executable, go to /store folder and look for subsNj.jar)
 
 (1) SubsNj will only attempt to repair SRT files, and not all formatting errors are repairable.
+
+Screenshots:
+![Alt text](http://i.imgur.com/BosOSkB.png "A file ready to be synchronised")
+![Alt text](http://i.imgur.com/ttSpFRF.png "Using the built-in editor")
