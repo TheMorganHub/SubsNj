@@ -415,7 +415,6 @@ public class UISyncer extends javax.swing.JFrame {
             }
         });
         uiTable.setAutoResizeMode(javax.swing.JTable.AUTO_RESIZE_OFF);
-        uiTable.setCellSelectionEnabled(true);
         uiTable.setFont(new java.awt.Font("Tahoma", 0, 12)); // NOI18N
         uiTable.setGridColor(new java.awt.Color(204, 204, 204));
         uiTable.setRowHeight(20);
