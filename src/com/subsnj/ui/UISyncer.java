@@ -19,6 +19,7 @@ import com.subsnj.subtitles.*;
 import com.subsnj.util.Utils;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
+import java.util.Arrays;
 import java.util.regex.Pattern;
 import javax.swing.AbstractAction;
 import javax.swing.JRadioButton;
@@ -69,19 +70,21 @@ public class UISyncer extends javax.swing.JFrame {
                 ((SpinnerNumberModel) spinnerTo.getModel()).setMaximum(parser.getSubtitles().size());
                 enableSyncRelatedComps(true);
                 setCursor(Utils.DEFAULT_CURSOR);
-                loadEditTab();
+                loadTable();
                 getJSpinnerEditor(spinnerMilliseconds).requestFocus();
             }
         };
         worker.execute();
     }
 
-    public void loadEditTab() {
+    public void loadTable() {
         List<Subtitle> subtitles = parser.getSubtitles();
         DefaultTableModel model = (DefaultTableModel) uiTable.getModel();
+        model.setRowCount(0);
+        int subIndex = 1;
         for (Subtitle subtitle : subtitles) {
             SRTSubtitle srtSub = (SRTSubtitle) subtitle;
-            String index = srtSub.getIndex();
+            String index = "" + (subIndex++);
             String startTime = srtSub.getStartTime().toString();
             String endTime = srtSub.getEndTime().toString();
             String body = srtSub.getText().replaceAll("\r\n", "|");
@@ -137,6 +140,7 @@ public class UISyncer extends javax.swing.JFrame {
         radioAll = new javax.swing.JRadioButton();
         radioSelection = new javax.swing.JRadioButton();
         btnSaveSubtitleFile = new javax.swing.JButton();
+        btnDelete = new javax.swing.JButton();
         menuBar = new javax.swing.JMenuBar();
         menuHelp = new javax.swing.JMenu();
         menuAbout = new javax.swing.JMenuItem();
@@ -459,6 +463,14 @@ public class UISyncer extends javax.swing.JFrame {
             }
         });
 
+        btnDelete.setText("Delete");
+        btnDelete.setEnabled(false);
+        btnDelete.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout pnlContainerEditLayout = new javax.swing.GroupLayout(pnlContainerEdit);
         pnlContainerEdit.setLayout(pnlContainerEditLayout);
         pnlContainerEditLayout.setHorizontalGroup(
@@ -469,7 +481,9 @@ public class UISyncer extends javax.swing.JFrame {
                     .addComponent(scrTable, javax.swing.GroupLayout.DEFAULT_SIZE, 756, Short.MAX_VALUE)
                     .addGroup(pnlContainerEditLayout.createSequentialGroup()
                         .addComponent(btnSaveSubtitleFile)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(btnDelete)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnDelayAll)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnAdvanceAll)
@@ -478,8 +492,7 @@ public class UISyncer extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(radioByRange)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(radioSelection)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(radioSelection)))
                 .addContainerGap())
         );
         pnlContainerEditLayout.setVerticalGroup(
@@ -494,7 +507,8 @@ public class UISyncer extends javax.swing.JFrame {
                     .addComponent(radioByRange)
                     .addComponent(radioAll)
                     .addComponent(radioSelection)
-                    .addComponent(btnSaveSubtitleFile))
+                    .addComponent(btnSaveSubtitleFile)
+                    .addComponent(btnDelete))
                 .addContainerGap())
         );
 
@@ -595,7 +609,60 @@ public class UISyncer extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_btnSaveSubtitleFileActionPerformed
 
-    public void actionSyncFromEditTab(JRadioButton radioAction) {
+    private void btnDeleteActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteActionPerformed
+        actionDeleteFromEditTab();
+    }//GEN-LAST:event_btnDeleteActionPerformed
+
+    public void actionSyncFromEditTab(JRadioButton radioOption) {
+        int[] rowRange = getValidRowRange();
+        if (rowRange[0] == -1 || rowRange[1] == -1) {
+            return;
+        }
+        radioOption.setSelected(true);
+        tabPane.setSelectedIndex(0);
+        spinnerFrom.setValue(rowRange[0]);
+        spinnerTo.setValue(rowRange[1]);
+        getJSpinnerEditor(spinnerMilliseconds).requestFocus();
+    }
+
+    /**
+     * The action of deleting subtitles from the table within the edit tab.
+     */
+    public void actionDeleteFromEditTab() {
+        int[] rowRange = getValidRowRange();
+        if (rowRange[0] == -1 || rowRange[1] == -1) {
+            return;
+        }
+        for (int i = rowRange[1]; i >= rowRange[0]; i--) {
+            parser.getSubtitles().remove(i - 1);
+        }
+        /*
+        correcting indices
+        probably ugly having to iterate over all the subs, but it's the easiest (and safest)
+        way without overcomplicating things
+         */
+        for (int i = 0; i < parser.getSubtitleCount(); i++) {
+            ((SRTSubtitle) parser.getSubtitle(i)).setIndex("" + (i + 1));
+        }
+        loadTable();
+    }
+
+    /**
+     * Computes a valid row range based on which radio button is the one
+     * selected.
+     * <ul>
+     * <li>If {@code radioByRange} is selected: the user will be prompted for a
+     * range and this method will validate it.</li>
+     * <li>If {@code radioSelection} is selected: the program will include all
+     * selected row numbers in the range.</li>
+     * <li>If {@code radioAll} is selected: the range will be from 1 to
+     * {@code parser.getSubtitleCount()}</li>
+     * </ul>
+     *
+     * @return an {@code int} array that depicts a range of rows. If validation
+     * within this method fails, the values within the array will be "-1, -1".
+     */
+    public int[] getValidRowRange() {
         int start;
         int end;
         if (radioByRange.isSelected()) {
@@ -605,21 +672,21 @@ public class UISyncer extends javax.swing.JFrame {
                 start = ranges[0];
                 end = ranges[1];
             } else {
-                return;
+                return new int[]{-1, -1};
             }
         } else if (radioSelection.isSelected()) {
             int[] selectedRows = uiTable.getSelectedRows();
+            if (selectedRows.length == 0) {
+                Utils.showMessage("Invalid selection", "No rows were selected.", this);
+                return new int[]{-1, -1};
+            }
             start = selectedRows[0] + 1;
             end = selectedRows[selectedRows.length - 1] + 1;
         } else { //all subs
             start = 1;
             end = parser.getSubtitleCount();
         }
-        radioAction.setSelected(true);
-        tabPane.setSelectedIndex(0);
-        spinnerFrom.setValue(start);
-        spinnerTo.setValue(end);
-        getJSpinnerEditor(spinnerMilliseconds).requestFocus();
+        return new int[]{start, end};
     }
 
     public JTextField getJSpinnerEditor(JSpinner spinner) {
@@ -634,6 +701,7 @@ public class UISyncer extends javax.swing.JFrame {
         btnDelayAll.setEnabled(flag);
         btnAdvanceAll.setEnabled(flag);
         btnSaveSubtitleFile.setEnabled(flag);
+        btnDelete.setEnabled(flag);
     }
 
     public JTextPane getTxtLog() {
@@ -728,6 +796,7 @@ public class UISyncer extends javax.swing.JFrame {
     private javax.swing.JButton btnAdvanceAll;
     private javax.swing.JButton btnBrowse;
     private javax.swing.JButton btnDelayAll;
+    private javax.swing.JButton btnDelete;
     private javax.swing.ButtonGroup btnGroupDelay;
     private javax.swing.ButtonGroup btnGroupEditRangeOrAll;
     private javax.swing.ButtonGroup btnGroupOverwrite;

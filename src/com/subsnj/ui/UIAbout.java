@@ -35,7 +35,7 @@ public class UIAbout extends javax.swing.JDialog {
 
         lblVersion.setFont(new java.awt.Font("Segoe UI", 0, 10)); // NOI18N
         lblVersion.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblVersion.setText("v1.0.1");
+        lblVersion.setText("v1.0.2");
         lblVersion.setEnabled(false);
 
         btnThanks.setText("Thanks!");

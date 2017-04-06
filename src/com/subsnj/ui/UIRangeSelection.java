@@ -45,6 +45,11 @@ public class UIRangeSelection extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Select a range");
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         btnConfirm.setText("Confirm");
         btnConfirm.addActionListener(new java.awt.event.ActionListener() {
@@ -113,11 +118,19 @@ public class UIRangeSelection extends javax.swing.JDialog {
     }//GEN-LAST:event_btnConfirmActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
+        actionCancel();
+    }//GEN-LAST:event_btnCancelActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        actionCancel();
+    }//GEN-LAST:event_formWindowClosing
+
+    public void actionCancel() {
         //return both -1
         spinnerFrom.setValue(-1);
         spinnerTo.setValue(-1);
         dispose();
-    }//GEN-LAST:event_btnCancelActionPerformed
+    }
 
     public void actionConfirm() {
         if ((int) spinnerFrom.getValue() > (int) spinnerTo.getValue()) {

@@ -27,12 +27,15 @@ public class Interval {
      * frame rate. It takes the exact frame number in which a subtitle appears
      * and divides it by the total framerate. It then multiplies this by 1000 to
      * obtain the exact time in ms in which the subtitle appears.
+     * <p>
+     * <b>Note: </b>the framerate will already be 23.980 by default, but the
+     * check if it's 0 below is done just in case.</p>
      *
      * @param frameNumber the specific frame in which the subtitle appears.
      * @param frameRate the total framerate of the video.
      */
     public Interval(double frameNumber, double frameRate) {
-        double totalMs = (frameNumber / frameRate) * 1000;
+        double totalMs = (frameNumber / (frameRate == 0.0 ? 23.980 : frameRate)) * 1000;
         this.milliseconds = (int) (totalMs % 1000);
         this.seconds = (int) (totalMs / 1000) % 60;
         this.minutes = (int) (totalMs / (1000 * 60)) % 60;
